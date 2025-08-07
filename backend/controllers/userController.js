@@ -242,3 +242,25 @@ exports.profileImage = async (req, res) => {
             profilePicture: imageUrl 
         });
     } 
+
+
+    exports.searchUsers = async (req, res) => {
+        const { query } = req.query;
+        if (!query) {
+            return res.status(400).json({ message: "Query parameter is required" });
+        }
+
+        try {
+            const users = await User.find({
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },
+                    { userName: { $regex: query, $options: 'i' } }
+                ]
+            }).select('name userName profilePicture');
+
+            res.status(200).json({ users });
+        } catch (error) {
+            console.error("Error searching users:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }

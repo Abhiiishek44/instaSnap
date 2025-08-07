@@ -110,7 +110,9 @@ const SideBar = () => {
                     {isSearchActive && (
                         <div className="p-6">
                             <h2 className="text-2xl font-bold mb-6">Search</h2>
-                            <input type="text" placeholder="Search" className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
+                            <input 
+                             
+                            type="text" placeholder="Search" className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
                             <div className="mt-6 text-center text-gray-500">Recent searches will appear here.</div>
                         </div>
                     )}
