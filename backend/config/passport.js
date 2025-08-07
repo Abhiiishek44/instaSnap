@@ -2,8 +2,6 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/user");
 
-
-
 passport.use(
   new GoogleStrategy(
     {
@@ -17,8 +15,12 @@ passport.use(
         if (!user) {
           user = await User.create({
             googleId: profile.id,
-            username: profile.displayName,
-            email: profile.emails[0].value,
+            name: profile.displayName || "Google User",
+            email: profile.emails?.[0]?.value,
+            userName: `google_${profile.id}`, // generate fallback
+            profilePicture:
+              profile.photos?.[0]?.value ||
+              "https://res.cloudinary.com/dz1qj3v5f/image/upload/v1698851234/Instagram/defaultProfilePicture.png",
           });
         }
         return done(null, user); // Pass user to route handler
