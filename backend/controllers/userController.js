@@ -218,3 +218,49 @@ exports.unfollowUser = async (req, res) => {
     res.status(200).json({ message: "User unfollowed successfully" });
 };
 
+
+exports.profileImage = async (req, res) => {
+        const userId = req.userId;
+        
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+        
+        const imagePath = req.file.path.replace(/\\/g, "/");
+        const imageUrl = `${req.protocol}://${req.get('host')}/${imagePath}`;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        
+        user.profilePicture = imageUrl;
+        await user.save();
+        
+        res.status(200).json({ 
+            message: "Profile picture updated successfully", 
+            profilePicture: imageUrl 
+        });
+    } 
+
+
+    exports.searchUsers = async (req, res) => {
+        const { query } = req.query;
+        if (!query) {
+            return res.status(400).json({ message: "Query parameter is required" });
+        }
+
+        try {
+            const users = await User.find({
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },
+                    { userName: { $regex: query, $options: 'i' } }
+                ]
+            }).select('name userName profilePicture');
+
+            res.status(200).json({ users });
+        } catch (error) {
+            console.error("Error searching users:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }

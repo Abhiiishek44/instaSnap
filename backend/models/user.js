@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
     default:
-      "https://res.cloudinary.com/dz1qj3v5f/image/upload/v1698851234/Instagram/defaultProfilePicture.png",
+      "https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg",
   },
   bio: {
     type: String,

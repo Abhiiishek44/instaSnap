@@ -43,6 +43,12 @@ const SideBar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const profileIcon = user?.profilePicture ? (
+        <img src={user.profilePicture} alt="Profile" className="w-6 h-6 rounded-full object-cover" />
+    ) : (
+        <User size={24} />
+    );
+
     const navItems = [
         { icon: <Home size={24} />, text: 'Home', path: '/' },
         { icon: <Search size={24} />, text: 'Search', action: activateSearch },
@@ -50,7 +56,7 @@ const SideBar = () => {
         { icon: <MessageCircle size={24} />, text: 'Messages', path: '/messages' },
         { icon: <Heart size={24} />, text: 'Notifications', action: activateNotifications },
         { icon: <PlusSquare size={24} />, text: 'Create', action: () => setIsCreateModalOpen(true) },
-        { icon: <img src={user?.profilePicture || user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || user?.userName}&size=24`} alt="Profile" className="w-6 h-6 rounded-full" />, text: 'Profile', path: '/profile' },
+        { icon: profileIcon, text: 'Profile', path: '/profile' },
     ];
 
     const isPanelActive = isSearchActive || isNotificationsActive;
@@ -104,7 +110,9 @@ const SideBar = () => {
                     {isSearchActive && (
                         <div className="p-6">
                             <h2 className="text-2xl font-bold mb-6">Search</h2>
-                            <input type="text" placeholder="Search" className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
+                            <input 
+                             
+                            type="text" placeholder="Search" className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
                             <div className="mt-6 text-center text-gray-500">Recent searches will appear here.</div>
                         </div>
                     )}
