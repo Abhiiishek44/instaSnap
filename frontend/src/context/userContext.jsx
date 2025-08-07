@@ -80,8 +80,6 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-
-
     const uploadPost = async (formData) => { 
         // To properly inspect FormData, you need to iterate over its entries.
         // A direct console.log(formData) will appear empty in most browsers.
@@ -103,7 +101,35 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    const value = { user, setUser, loading, getAccountDetails, isAuthenticated, login, register, logout, uploadPost };
+    const getUserPosts = async (setPosts = null, setLoading = null) => {
+        if (setPosts && setLoading && user && isAuthenticated) {
+            setLoading(true);
+        }
+        try {
+            const response = await axios.get('http://localhost:5000/api/post/', {
+                withCredentials: true
+            });
+            
+            const userPosts = response.data.posts.filter(post => post.user._id === user._id);
+            if (setPosts) {
+                setPosts(userPosts);
+            }
+            return userPosts;
+        } catch (error) {
+            console.error('Failed to fetch posts:', error);
+            if (setPosts) {
+                setPosts([]);
+            }
+            return [];
+        }finally {
+            if (setLoading) {
+                setLoading(false);
+            }
+        }
+    };
+   
+    
+    const value = { user, setUser, loading, getAccountDetails, isAuthenticated, login, register, logout, uploadPost, getUserPosts };
 
     return (
         <UserContext.Provider value={value}>

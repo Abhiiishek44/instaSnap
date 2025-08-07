@@ -5,14 +5,10 @@ exports.newPost = async (req, res) => {
         return res.status(400).json({ message: "Please upload a file" });
     }
     const { caption } = req.body;
-    const userId = req.userId; // Use req.userId instead of req.user._id
-    console.log("User ID:", userId);
-    console.log("Received caption:", req.body);
+    const userId = req.userId; 
     
-    // Create a proper URL for the image
     const imagePath = req.file.path.replace(/\\/g, "/");
     const imageUrl = `${req.protocol}://${req.get('host')}/${imagePath}`;
-    console.log("Image URL:", imageUrl);
     
     const post = new Post({
         user: userId,

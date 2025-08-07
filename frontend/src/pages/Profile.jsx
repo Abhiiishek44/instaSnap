@@ -1,18 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Grid, Clapperboard, UserCheck, MoreHorizontal, Heart, MessageCircle, Camera } from 'lucide-react';
-import { userStore } from '../context/userContext';
 import SideBar from "../components/SideBar";
+import {useUser} from "../context/userContext.jsx";
+import axios from 'axios';
 
 const Profile = () => {
-    const { user, isAuthenticated } = userStore();
+    const { user, isAuthenticated, getUserPosts } = useUser();
     const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const profilePictureInputRef = useRef(null);
+
+    // Function to handle profile picture click
+    const handleProfilePictureClick = () => {
+        profilePictureInputRef.current?.click();
+    };
+
+    // Function to handle profile picture upload
+    const handleProfilePictureUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('profileImage', file);
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/user/profile-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                withCredentials: true
+            });
+            window.location.reload();
+        } catch (error) {
+            console.error('Failed to upload profile picture:', error);
+            alert('Failed to upload profile picture. Please try again.');
+        }
+    };
 
     useEffect(() => {
-        if (user?.posts) {
-            setPosts(user.posts);
-        }
-    }, [user]);
+        getUserPosts(setPosts, setLoading);
+    }, [user, isAuthenticated, getUserPosts]);
 
     // Placeholder for story highlights
     const storyHighlights = [
@@ -48,11 +76,25 @@ const Profile = () => {
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {/* Profile Header */}
                     <header className="flex items-center gap-8 md:gap-16 mb-8">
-                        <div className="flex-shrink-0 w-28 h-28 md:w-36 md:h-36">
+                        <div className="flex-shrink-0 w-28 h-28 md:w-36 md:h-36 relative group">
                             <img
-                                className="w-full h-full rounded-full object-cover ring-2 ring-offset-2 ring-gray-200"
-                                src={user.profilePicture || user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.userName)}&size=150&background=f3f4f6&color=6b7280`}
+                                className="w-full h-full rounded-full object-cover ring-2 ring-offset-2 ring-gray-200 cursor-pointer transition-opacity group-hover:opacity-75"
+                                src={user.profilePicture || user.avatar}
                                 alt={`${user.name || user.userName}'s profile`}
+                                onClick={handleProfilePictureClick}
+                            />  
+                            <div 
+                                className="absolute inset-0 rounded-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center"
+                                onClick={handleProfilePictureClick}
+                            >
+                                <Camera className="w-8 h-8 text-white" />
+                            </div>
+                            <input
+                                type="file"
+                                ref={profilePictureInputRef}
+                                onChange={handleProfilePictureUpload}
+                                accept="image/*"
+                                className="hidden"
                             />
                         </div>
 
@@ -139,14 +181,21 @@ const Profile = () => {
 
                     {/* Posts Grid or Outlet */}
                     <div className="mt-4">
-                        {posts.length === 0 ? (
+                        {loading ? (
+                            <div className="flex justify-center items-center py-20">
+                                <div className="text-gray-500">Loading posts...</div>
+                            </div>
+                        ) : posts.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-20 text-center">
                                 <div className="w-24 h-24 border-2 border-gray-800 rounded-full flex items-center justify-center mb-4">
                                     <Camera className="w-10 h-10 text-gray-800" />
                                 </div>
                                 <h2 className="text-3xl font-light text-gray-900">Share Photos</h2>
                                 <p className="text-gray-600 mt-2">When you share photos, they will appear on your profile.</p>
-                                <button className="text-blue-500 font-semibold mt-4 hover:text-blue-700">
+                                <button 
+                                    className="text-blue-500 font-semibold mt-4 hover:text-blue-700"
+                                    onClick={() => window.location.reload()} // Refresh to check for new posts
+                                >
                                     Share your first photo
                                 </button>
                             </div>
@@ -155,11 +204,14 @@ const Profile = () => {
                                 {posts.map((post) => (
                                     <div key={post._id} className="relative group aspect-square bg-gray-100 cursor-pointer">
                                         <img
-                                            src={post.image || post.imageUrl}
-                                            alt={post.caption || 'Post'}
+                                            src={post.image}
+                                            alt={'Post'}
                                             className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                e.target.src = 'https://via.placeholder.com/300x300?text=Image+Not+Found';
+                                            }}
                                         />
-                                        <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-30 transition-opacity flex items-center justify-center">
                                             <div className="flex items-center gap-6 text-white">
                                                 <div className="flex items-center gap-2">
                                                     <Heart className="w-6 h-6 fill-current" />
