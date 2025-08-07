@@ -18,10 +18,9 @@ const Search = () => {
         const timerId = setTimeout(async () => {
             setSearchLoading(true);
             try {
-                const users = await searchUsers(searchQuery);
+                const users = await searchUsers(searchQuery) ;
                 setSearchResults(users);
-            } catch (error)
-             {
+            } catch (error) {
                 console.error("Search failed:", error);
                 setSearchResults([]);
             } finally {
