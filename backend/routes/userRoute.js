@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { body } = require('express-validator');
 const catchAsyncErrors = require('../middlewares/catchAsyncError');
-const { registerUser, loginUser, getAccountDetails,forgotPassword} = require('../controllers/userController');
+const { registerUser, loginUser, logoutUser,getAccountDetails,forgotPassword} = require('../controllers/userController');
 const validateRequest = require('../middlewares/validator'); // renamed for clarity
 const isAuthenticated = require('../middlewares/auth');
 const validators = {
@@ -18,7 +18,8 @@ const validators = {
 };
 
 router.post('/register', validators.register, validateRequest, catchAsyncErrors(registerUser));
-router.post('/login', validators.login, validateRequest, catchAsyncErrors(loginUser));  ``
+router.post('/login',  validateRequest, validators.login,catchAsyncErrors(loginUser));
+router.get('/logout', isAuthenticated, catchAsyncErrors(logoutUser));
 router.get('/me', isAuthenticated, catchAsyncErrors(getAccountDetails));
 router.post('/email',catchAsyncErrors(forgotPassword))
 module.exports = router;

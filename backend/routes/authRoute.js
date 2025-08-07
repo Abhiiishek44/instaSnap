@@ -1,7 +1,8 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
+const { cookie } = require("express-validator");
 const passport = require("passport");
 const router = express.Router();
+const { generateToken } = require("../config/generateToken"); // Fix: Use destructured import
 
 router.get(
     "/google",
@@ -17,10 +18,14 @@ router.get(
         failureRedirect: "/login",
     }),
     (req, res) => {
-        const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
-            expiresIn: "7d",
-        });
-        res.redirect(`http://localhost:5173?token=${token}`);
+        try {
+            generateToken(res, req.user._id);
+
+            res.redirect(`http://localhost:5173`);
+        } catch (error) {
+            console.error("Google callback error:", error);
+            res.redirect(`http://localhost:5173/login?error=auth_failed`);
+        }
     }
 );
 

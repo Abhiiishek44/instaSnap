@@ -7,27 +7,24 @@ const jwt = require("jsonwebtoken");
 exports.registerUser = async (req, res, next) => {
     const { email, password, name, userName } = req.body;
 
-    if (!email || !password || !name || !userName) {
-        return res.status(400).json({ message: "Please fill all fields" });
-    }
-    existingUser = await User.findOne({ $or: [{ email }, { userName }] });
+    const existingUser = await User.findOne({ $or: [{ email }, { userName }] });
     if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
     }
-
     const user = await User.create({
         email,
         password,
         name,
         userName,
     });
-
-    generateToken(res, user._id);
-    res.status(201).json({ message: "User registered", user });
+   const token= generateToken(res, user._id);
+   console.log(token)
+    res.status(201).json({ message: "User registered", user, token });
 };
 
 exports.loginUser = async (req, res, next) => {
     const { email, password } = req.body;
+    console.log("Logging in user:", { email });
     if (!email || !password) {
         return res.status(400).json({ message: "Please fill all fields" });
     }
@@ -44,7 +41,7 @@ exports.loginUser = async (req, res, next) => {
 };
 
 exports.logoutUser = async (req, res, next) => {
-    res.cookie("token", "", {
+    res.cookie("jwt", "", {
         expires: new Date(Date.now()),
         httpOnly: true,
     });
@@ -71,7 +68,6 @@ exports.resetPassword = async (req, res, next) => {
 
 exports.getAccountDetails = async (req, res, next) => {
     const userId = req.userId;
-    console.log("User ID from request:", userId);
     const user = await User.findById(userId);
     if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -221,3 +217,4 @@ exports.unfollowUser = async (req, res) => {
     await unfollowUser.save();
     res.status(200).json({ message: "User unfollowed successfully" });
 };
+

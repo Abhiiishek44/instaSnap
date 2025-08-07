@@ -1,26 +1,39 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 require('dotenv').config();
 const cors = require('cors');
+const cookieParser = require('cookie-parser'); // for parsing cookies
 const connectDB = require('./config/database'); 
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const authRoutes = require('./routes/authRoute');
-const passport = require("passport");
 const userRouter =require('./routes/userRoute')
+const postRouter = require('./routes/postRouter');
+const passport = require("passport");
+const bodyParser = require('body-parser');
 
+require('./config/passport'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(passport.initialize());
+app.use(cors({
+  origin: 'http://localhost:5173', // your frontend
+  credentials: true
+}));
 
+// Middleware setup
+app.use(bodyParser.json());
+app.use(cookieParser()); // Parse cookies
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+// Serve static files from the "uploads" directory
+app.use('/uploads', express.static('uploads'));
+
+app.use(passport.initialize());
 
 app.use("/api/auth", authRoutes);
 app.use('/api/user',userRouter)
-
+app.use('/api/post', postRouter);
 
 app.use(errorMiddleware);
 const startServer = async () => {

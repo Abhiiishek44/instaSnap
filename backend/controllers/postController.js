@@ -1,16 +1,32 @@
 const Post = require("../models/post");
 
-exports.newPost= async (req, res) => {
-      const { image, caption } = req.body;
-      const userId = req.user._id;
+exports.newPost = async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: "Please upload a file" });
+    }
+    const { caption } = req.body;
+    const userId = req.userId; // Use req.userId instead of req.user._id
+    console.log("User ID:", userId);
+    console.log("Received caption:", req.body);
+    
+    // Create a proper URL for the image
+    const imagePath = req.file.path.replace(/\\/g, "/");
+    const imageUrl = `${req.protocol}://${req.get('host')}/${imagePath}`;
+    console.log("Image URL:", imageUrl);
+    
+    const post = new Post({
+        user: userId,
+        image: imageUrl,
+        caption
+    });
+    console.log("New post created:", post);
 
-       const post= new Post({
-           user: userId,
-           image,
-           caption
-       });
-       await post.save();
-       res.status(201).json({ message: "Post created successfully", post });
+    await post.save();
+    
+    // Populate the user details in the newly created post before sending it back
+    const populatedPost = await Post.findById(post._id).populate("user", "name userName profilePicture");
+    
+    res.status(201).json({ message: "Post created successfully", post: populatedPost });
 };
 
 exports.getPosts = async (req, res) => {

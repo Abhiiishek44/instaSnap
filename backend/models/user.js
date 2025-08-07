@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
-    unique: true,
+    required: false, // optional for manual login
   },
   name: {
     type: String,
@@ -17,7 +17,9 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: function () {
+      return !this.googleId; // only require for manual login
+    },
   },
   userName: {
     type: String,
@@ -60,7 +62,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
+  if (this.isModified("password") && this.password) {
     this.password = await bcrypt.hash(this.password, 10);
   }
   next();
@@ -69,7 +71,6 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
