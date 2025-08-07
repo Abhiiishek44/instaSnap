@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
-import Home from "./pages/home.jsx";
+import Home from "./pages/Home.jsx";
 import Message from "./pages/message.jsx";
 import ProtectedRoute from "./context/ProtectedRoute.jsx";
 import Layout from "./pages/Layout.jsx";

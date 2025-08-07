@@ -128,8 +128,24 @@ export const UserProvider = ({ children }) => {
         }
     };
    
-    
-    const value = { user, setUser, loading, getAccountDetails, isAuthenticated, login, register, logout, uploadPost, getUserPosts };
+    const searchUsers = async (query) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/user/search?query=${query}`, {
+                withCredentials: true
+            });
+            return response.data.users;
+        } catch (error) {
+            console.error('Failed to search users:', error);
+            throw error; 
+        }
+    }
+
+    const value = { user, setUser, 
+        loading, 
+        getAccountDetails, 
+        isAuthenticated, login, 
+        register, logout, uploadPost, 
+        getUserPosts, searchUsers };
 
     return (
         <UserContext.Provider value={value}>

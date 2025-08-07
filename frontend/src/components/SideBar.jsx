@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Search, Home, Compass, MessageCircle, Heart, PlusSquare, User, Settings, LogOut, X } from 'lucide-react';
+import { Search as SearchIcon, Home, Compass, MessageCircle, Heart, PlusSquare, User, Settings, LogOut, X } from 'lucide-react';
 import { useUser } from '../context/userContext';
 import CreatePost from './CreatePost';
+import Search from './Search';
 
 const SideBar = () => {
     const { user, logout } = useUser();
@@ -51,7 +52,7 @@ const SideBar = () => {
 
     const navItems = [
         { icon: <Home size={24} />, text: 'Home', path: '/' },
-        { icon: <Search size={24} />, text: 'Search', action: activateSearch },
+        { icon: <SearchIcon size={24} />, text: 'Search', action: activateSearch },
         { icon: <Compass size={24} />, text: 'Explore', path: '/explore' },
         { icon: <MessageCircle size={24} />, text: 'Messages', path: '/messages' },
         { icon: <Heart size={24} />, text: 'Notifications', action: activateNotifications },
@@ -107,15 +108,7 @@ const SideBar = () => {
 
                 {/* Search & Notifications Panel */}
                 <div className={`absolute top-0 left-full h-full bg-white border-r border-gray-300 rounded-r-2xl shadow-lg transition-transform duration-300 w-[400px] ${isPanelActive ? 'translate-x-0' : '-translate-x-full'}`} style={{ zIndex: -1 }}>
-                    {isSearchActive && (
-                        <div className="p-6">
-                            <h2 className="text-2xl font-bold mb-6">Search</h2>
-                            <input 
-                             
-                            type="text" placeholder="Search" className="w-full p-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
-                            <div className="mt-6 text-center text-gray-500">Recent searches will appear here.</div>
-                        </div>
-                    )}
+                    {isSearchActive && <Search />}
                     {isNotificationsActive && (
                         <div className="p-6">
                             <h2 className="text-2xl font-bold mb-6">Notifications</h2>

@@ -3,6 +3,7 @@ import SideBar from '../components/SideBar';
 import StoryScroll from '../components/StoryScroll';
 import PostPage from '../components/PostPage';
 import Suggestion from '../components/Suggestion';
+
 export default function Home() {
 
   return (
@@ -40,4 +41,5 @@ export default function Home() {
     </div>
   );
 }
+
  

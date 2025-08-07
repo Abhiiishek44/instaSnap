@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
             console.error("Logout error:", error);  
         }
     };
+    
 
     return(
         <AuthContext.Provider value={{ user, setUser, register, login, isAuthenticated, logout }}>
