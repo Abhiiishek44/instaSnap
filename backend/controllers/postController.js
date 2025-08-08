@@ -1,28 +1,37 @@
 const Post = require("../models/post");
+const User = require("../models/user");
 
 exports.newPost = async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "Please upload a file" });
     }
     const { caption } = req.body;
-    const userId = req.userId; 
-    
+    const userId = req.userId;
+
     const imagePath = req.file.path.replace(/\\/g, "/");
     const imageUrl = `${req.protocol}://${req.get('host')}/${imagePath}`;
-    
-    const post = new Post({
-        user: userId,
-        image: imageUrl,
-        caption
-    });
-    console.log("New post created:", post);
 
-    await post.save();
-    
-    // Populate the user details in the newly created post before sending it back
-    const populatedPost = await Post.findById(post._id).populate("user", "name userName profilePicture");
-    
-    res.status(201).json({ message: "Post created successfully", post: populatedPost });
+    try {
+        const post = new Post({
+            user: userId,
+            image: imageUrl,
+            caption
+        });
+        console.log("New post created:", post);
+
+        await post.save();
+
+        // Push post reference into the creating user's posts array so profile population works
+        await User.findByIdAndUpdate(userId, { $push: { posts: post._id } });
+
+        // Populate the user details in the newly created post before sending it back
+        const populatedPost = await Post.findById(post._id).populate("user", "name userName profilePicture");
+
+        res.status(201).json({ message: "Post created successfully", post: populatedPost });
+    } catch (error) {
+        console.error("Error creating post:", error);
+        res.status(500).json({ message: "Failed to create post" });
+    }
 };
 
 exports.getPosts = async (req, res) => {

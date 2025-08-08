@@ -140,12 +140,58 @@ export const UserProvider = ({ children }) => {
         }
     }
 
-    const value = { user, setUser, 
+    const getUserDetailsByName = async (userName) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/user/profile/${userName}`, {
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Failed to fetch user details:', error);
+            throw error;
+        }
+    };
+    
+    const followUser = async (followUserId) => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/user/follow', { followUserId }, {
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Failed to follow user:', error);
+            throw error;
+        }
+    };
+
+    const unfollowUser = async (unfollowUserId) => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/user/unfollow', { unfollowUserId }, {
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Failed to unfollow user:', error);
+            throw error;
+        }
+    };
+    
+
+    const value = { 
+        user, setUser, 
         loading, 
         getAccountDetails, 
-        isAuthenticated, login, 
-        register, logout, uploadPost, 
-        getUserPosts, searchUsers };
+        isAuthenticated, 
+        login, 
+        register, 
+        logout, 
+        uploadPost, 
+        getUserPosts, 
+        searchUsers,
+    getUserDetailsByName,
+    followUser,
+    unfollowUser,
+    };
 
     return (
         <UserContext.Provider value={value}>

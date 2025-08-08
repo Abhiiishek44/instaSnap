@@ -76,46 +76,42 @@ exports.getAccountDetails = async (req, res, next) => {
 };
 
 exports.getUserDetails = async (req, res, next) => {
-    const username = req.params.username;
-  
-    const user = await User.findOne({ username })
-      .populate("followers", "username profileImage")
-      .populate("following", "username profileImage")
-      .populate({
-        path: "posts",
-        populate: [
-          {
-            path: "comments",
-            populate: { path: "user", select: "username profileImage" },
-          },
-          {
-            path: "postedBy",
-            select: "username profileImage",
-          },
-        ],
-      })
-      .populate({
-        path: "saved",
-        populate: [
-          {
-            path: "comments",
-            populate: { path: "user", select: "username profileImage" },
-          },
-          {
-            path: "postedBy",
-            select: "username profileImage",
-          },
-        ],
-      });
+    try {
+        // Route param is defined as :username (NOT :userName)
+        const { username } = req.params;
+        if (!username) {
+            return res.status(400).json({ success: false, message: "Username parameter is required" });
+        }
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+        // Find user case-insensitively by userName field
+        const user = await User.findOne({ userName: { $regex: `^${username}$`, $options: 'i' } })
+            .select('-password')
+            .populate('followers', 'userName profilePicture')
+            .populate('following', 'userName profilePicture')
+            .populate({
+                path: 'posts',
+                populate: [
+                    { path: 'user', select: 'userName profilePicture' }, // owner of post
+                    { path: 'comments.user', select: 'userName profilePicture' }
+                ]
+            })
+            .populate({
+                path: 'savedPosts',
+                populate: [
+                    { path: 'user', select: 'userName profilePicture' },
+                    { path: 'comments.user', select: 'userName profilePicture' }
+                ]
+            });
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        return res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.error('getUserDetails error:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
     }
-
-    res.status(200).json({
-      success: true,
-      user,
-    });
 };
 
 

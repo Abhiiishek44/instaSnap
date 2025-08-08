@@ -21,6 +21,7 @@ app.use(cors({
 }));
 
 // Middleware setup
+
 app.use(bodyParser.json());
 app.use(cookieParser()); // Parse cookies
 app.use(express.json()); // Parse JSON bodies
@@ -47,5 +48,8 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+
+
 
 startServer();

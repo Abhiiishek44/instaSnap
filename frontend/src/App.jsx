@@ -7,7 +7,7 @@ import Message from "./pages/message.jsx";
 import ProtectedRoute from "./context/ProtectedRoute.jsx";
 import Layout from "./pages/Layout.jsx";
 import { UserProvider } from "./context/userContext.jsx";
-
+const UserProfile = lazy(() => import('./pages/UserProfile.jsx'));
 const Profile = lazy(() => import('./pages/Profile.jsx'));
 
 const App = () => {
@@ -28,6 +28,7 @@ const App = () => {
                 </Route>
                 <Route path="/messages" element={<Message />} />
               </Route>
+              <Route path="/profile/:userName" element={<UserProfile />} />
             </Routes>
           </Suspense>
         </UserProvider>

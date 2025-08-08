@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Search as SearchIcon, Home, Compass, MessageCircle, Heart, PlusSquare, User, Settings, LogOut, X } from 'lucide-react';
+import { Search as SearchIcon, Home, Compass, MessageCircle, Heart, PlusSquare, User, Settings, LogOut, X ,InstagramIcon, Instagram } from 'lucide-react';
 import { useUser } from '../context/userContext';
 import CreatePost from './CreatePost';
 import Search from './Search';
 
-const SideBar = () => {
+const SideBar = ({ initialCollapsed = false }) => {
     const { user, logout } = useUser();
     const navigate = useNavigate();
     const [isSearchActive, setIsSearchActive] = useState(false);
     const [isNotificationsActive, setIsNotificationsActive] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(initialCollapsed);
     const sidebarRef = useRef(null);
 
     const handleLogout = async () => {
@@ -45,7 +46,7 @@ const SideBar = () => {
     }, []);
 
     const profileIcon = user?.profilePicture ? (
-        <img src={user.profilePicture} alt="Profile" className="w-6 h-6 rounded-full object-cover" />
+        <img size={24} color="#E1306C" src={user.profilePicture} alt="Profile" className="w-6 h-6 rounded-full object-cover" />
     ) : (
         <User size={24} />
     );
@@ -61,17 +62,18 @@ const SideBar = () => {
     ];
 
     const isPanelActive = isSearchActive || isNotificationsActive;
+    const collapsed = isCollapsed || isPanelActive;
 
     return (
         <>
-            <aside ref={sidebarRef} className={`fixed top-0 left-0 h-full bg-white border-r border-gray-300 z-50 flex transition-all duration-300 ${isPanelActive ? 'w-20' : 'w-64'}`}>
+            <aside ref={sidebarRef} className={`fixed top-0 left-0 h-full bg-white border-r border-gray-300 z-50 flex transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}>
                 {/* Main Sidebar Navigation */}
                 <div className="flex flex-col justify-between w-full p-3">
                     <div>
                         <div className="mb-10 mt-4 px-3">
                             <Link to="/" onClick={deactivatePanels}>
-                                {isPanelActive ? (
-                                    <img src="/instagram-icon.png" alt="Instagram" className="h-7 w-7" />
+                                {collapsed ? (
+                                    <Instagram size={24} color="#E1306C" src="/instagram-icon.png" alt="Instagram" className="h-7 w-7" />
                                 ) : (
                                     <h1 className="text-2xl" style={{ fontFamily: 'Billabong, cursive' }}>Instagram</h1>
                                 )}
@@ -84,12 +86,12 @@ const SideBar = () => {
                                         {item.path ? (
                                             <NavLink to={item.path} onClick={deactivatePanels} className={({ isActive }) => `flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 transition-colors ${isActive ? 'font-bold' : ''}`}>
                                                 {item.icon}
-                                                {!isPanelActive && <span>{item.text}</span>}
+                                                {!collapsed && <span>{item.text}</span>}
                                             </NavLink>
                                         ) : (
                                             <button onClick={item.action} className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 transition-colors">
                                                 {item.icon}
-                                                {!isPanelActive && <span>{item.text}</span>}
+                                                {!collapsed && <span>{item.text}</span>}
                                             </button>
                                         )}
                                     </li>
@@ -101,7 +103,7 @@ const SideBar = () => {
                         <button className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 transition-colors"
                             onClick={handleLogout}>
                             <LogOut size={24} />
-                            {!isPanelActive && <span>Logout</span>}
+                            {!collapsed && <span>Logout</span>}
                         </button>
                     </div>
                 </div>
