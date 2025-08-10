@@ -9,6 +9,8 @@ const userRouter =require('./routes/userRoute')
 const postRouter = require('./routes/postRouter');
 const passport = require("passport");
 const bodyParser = require('body-parser');
+const http  =require('http');
+const { Server } = require('socket.io');
 
 require('./config/passport'); 
 
@@ -20,6 +22,53 @@ app.use(cors({
   credentials: true
 }));
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:5173',
+    credentials: true,
+     methods: ["GET", "POST"]
+  }
+});
+
+let onlineUsers = {};
+
+
+io.on("connection", (socket) => {
+  console.log("New client connected", socket.id);
+
+  socket.on("addUser", (userId) => {
+    if (userId) {
+      onlineUsers[userId] = socket.id;
+      console.log("Online Users:", onlineUsers);
+      io.emit("getUsers", onlineUsers);
+    }
+  });
+
+  socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+    if (!senderId || !receiverId || !text) return;
+    const receiverSocketId = onlineUsers[receiverId];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receiveMessage", {
+        senderId,
+        text,
+        createdAt: new Date()
+      });
+    }
+  });
+
+  socket.on("disconnect", () => {
+    for (const [uid, sid] of Object.entries(onlineUsers)) {
+      if (sid === socket.id) {
+        delete onlineUsers[uid];
+        break;
+      }
+    }
+    io.emit("getUsers", onlineUsers);
+    console.log("Client disconnected", socket.id);
+  });
+});
+
 // Middleware setup
 
 app.use(bodyParser.json());
@@ -27,11 +76,16 @@ app.use(cookieParser()); // Parse cookies
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+
+
+
+
+
+
 // Serve static files from the "uploads" directory
 app.use('/uploads', express.static('uploads'));
 
 app.use(passport.initialize());
-
 app.use("/api/auth", authRoutes);
 app.use('/api/user',userRouter)
 app.use('/api/post', postRouter);
@@ -40,8 +94,8 @@ app.use(errorMiddleware);
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+    server.listen(PORT, () => {
+      console.log(`Server & Socket running on port ${PORT}`);
     });
   } catch (error) {
     console.error('Database connection failed:', error);
