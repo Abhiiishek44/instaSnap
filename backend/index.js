@@ -7,6 +7,7 @@ const errorMiddleware = require('./middlewares/errorMiddleware');
 const authRoutes = require('./routes/authRoute');
 const userRouter =require('./routes/userRoute')
 const postRouter = require('./routes/postRouter');
+const messageRouter = require('./routes/messageRoute');
 const passport = require("passport");
 const bodyParser = require('body-parser');
 const http  =require('http');
@@ -77,11 +78,6 @@ app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 
-
-
-
-
-
 // Serve static files from the "uploads" directory
 app.use('/uploads', express.static('uploads'));
 
@@ -89,6 +85,7 @@ app.use(passport.initialize());
 app.use("/api/auth", authRoutes);
 app.use('/api/user',userRouter)
 app.use('/api/post', postRouter);
+app.use('/api/chat', messageRouter);
 
 app.use(errorMiddleware);
 const startServer = async () => {

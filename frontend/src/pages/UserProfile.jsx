@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, NavLink } from 'react-router-dom'
+import { useParams, NavLink, useNavigate } from 'react-router-dom'
 import { useUser } from '../context/userContext'
 import SideBar from '../components/SideBar'
 import {
@@ -26,6 +26,7 @@ const UserProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false)
   const [showFollowMenu, setShowFollowMenu] = useState(false)
 
+  const navigate = useNavigate()
   console.log('username', userName)
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -157,9 +158,13 @@ const UserProfile = () => {
                     )}
                   </>
                 )}
-                <button className='px-4 py-1.5 bg-gray-100 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors'>
-                  Message
-                </button>
+                {currentUser && currentUser._id !== profileUser._id && (
+                  <button
+                    onClick={() => navigate(`/messages/${profileUser._id}`)}
+                    className='px-4 py-1.5 bg-gray-100 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors'>
+                    Message
+                  </button>
+                )}
                 <button className='p-1.5 hover:bg-gray-100 rounded-full transition-colors'>
                   <MoreHorizontal className='w-5 h-5 text-gray-700' />
                 </button>

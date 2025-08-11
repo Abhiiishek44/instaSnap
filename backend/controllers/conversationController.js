@@ -7,11 +7,12 @@ exports.createOrGetConversation = async (req, res) => {
         return res.status(400).json({ message: 'senderId and receiverId are required' });
     }
     try {
-        let conversation = await Conversation.findOne({
-            participants: { $all: [senderId, receiverId] }
-        });
+        // Build deterministic key to prevent duplicates
+        const key = [senderId, receiverId].map(id => id.toString()).sort().join('_');
+        let conversation = await Conversation.findOne({ participantsKey: key }).populate('participants', 'userName profilePicture');
         if (!conversation) {
-            conversation = await Conversation.create({ participants: [senderId, receiverId] });
+            conversation = await Conversation.create({ participants: [senderId, receiverId], participantsKey: key });
+            conversation = await Conversation.findById(conversation._id).populate('participants', 'userName profilePicture');
         }
         return res.status(200).json(conversation);
     } catch (err) {

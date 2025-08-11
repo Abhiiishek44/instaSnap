@@ -7,6 +7,7 @@ import Message from "./pages/message.jsx";
 import ProtectedRoute from "./context/ProtectedRoute.jsx";
 import Layout from "./pages/Layout.jsx";
 import { UserProvider } from "./context/userContext.jsx";
+import { MessageProvider } from './context/messageContext.jsx';
 const UserProfile = lazy(() => import('./pages/UserProfile.jsx'));
 const Profile = lazy(() => import('./pages/Profile.jsx'));
 
@@ -14,6 +15,7 @@ const App = () => {
   return (
     <Router>
         <UserProvider>
+          <MessageProvider>
           <Suspense fallback={<div className="flex justify-center items-center h-screen"><div>Loading...</div></div>}>
             <Routes>
               <Route path="/register" element={<Register />} />
@@ -27,10 +29,12 @@ const App = () => {
                   <Route path="tagged" element={<h1>Tagged</h1>} />
                 </Route>
                 <Route path="/messages" element={<Message />} />
+                <Route path="/messages/:userId" element={<Message />} />
               </Route>
               <Route path="/profile/:userName" element={<UserProfile />} />
             </Routes>
           </Suspense>
+          </MessageProvider>
         </UserProvider>
     </Router>
   );
