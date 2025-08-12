@@ -14,6 +14,7 @@ export const MessageProvider = ({ children }) => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const hasRegistered = useRef(false);
+  // Removed unread badge logic per request
 
   // Helpers
   const enhanceConversation = useCallback((c) => {
@@ -40,32 +41,37 @@ export const MessageProvider = ({ children }) => {
   // Incoming realtime messages
   useEffect(() => {
     const handler = (data) => {
-      // If message involves current user, update state
       if (!data) return;
-      const { senderId, receiverId } = data;
-      if (senderId === user?._id || receiverId === user?._id) {
-        // If it belongs to active conversation participants, append
-        if (activeConversation && activeConversation.participants?.some(p => p._id === senderId || p._id === receiverId)) {
-          setMessages(prev => [...prev, data]);
-          updateConversationMeta(c => c._id === activeConversation._id, () => ({
-            lastMessageAt: data.createdAt || new Date().toISOString(),
-            lastMessagePreview: data.text || data.content || ''
-          }));
-        } else {
-          // Update meta for the matching conversation (direct chat pair)
-          updateConversationMeta(c => {
-            const ids = (c.participants || []).map(p => p._id || p);
-            return ids.includes(senderId) && ids.includes(receiverId);
-          }, () => ({
-            lastMessageAt: data.createdAt || new Date().toISOString(),
-            lastMessagePreview: data.text || data.content || ''
-          }));
-        }
+      const { senderId, receiverId, conversationId, text, content } = data;
+      if (senderId !== user?._id && receiverId !== user?._id) return;
+      const preview = text || content || '';
+      const ts = data.createdAt || new Date().toISOString();
+      if (activeConversation && (conversationId === activeConversation._id || activeConversation.participants?.some(p => p._id === senderId || p._id === receiverId))) {
+        setMessages(prev => [...prev, data]);
+        updateConversationMeta(c => c._id === activeConversation._id, () => ({
+          lastMessageAt: ts,
+          lastMessagePreview: preview
+        }));
+        return;
       }
+      // Update only metadata for inactive conversations (no unread tracking now)
+      let targetId = conversationId || null;
+      if (!targetId) {
+        const match = conversations.find(c => {
+          const ids = (c.participants || []).map(p => p._id || p);
+          return ids.includes(senderId) && ids.includes(receiverId);
+        });
+        if (match) targetId = match._id;
+      }
+      if (!targetId) return;
+      updateConversationMeta(c => c._id === targetId, () => ({
+        lastMessageAt: ts,
+        lastMessagePreview: preview
+      }));
     };
     socket.on('receiveMessage', handler);
     return () => socket.off('receiveMessage', handler);
-  }, [activeConversation, user?._id, updateConversationMeta]);
+  }, [activeConversation, user?._id, updateConversationMeta, conversations]);
 
   const api = axios.create({
     baseURL: 'http://localhost:5000/api/chat',
@@ -152,6 +158,7 @@ export const MessageProvider = ({ children }) => {
     if (!conversation) return;
     setActiveConversation(conversation);
     await loadConversationMessages(conversation._id);
+  // Unread removal not needed anymore
   }, [loadConversationMessages]);
 
   // Send message (persist + emit)
@@ -162,7 +169,7 @@ export const MessageProvider = ({ children }) => {
       const { data } = await api.post('/message', { conversationId, senderId: user._id, receiverId, content: content.trim() });
       setMessages(prev => [...prev, data]);
       // Emit realtime event for receiver
-      socket.emit('sendMessage', { senderId: user._id, receiverId, text: content.trim(), createdAt: new Date() });
+  socket.emit('sendMessage', { senderId: user._id, receiverId, conversationId, text: content.trim(), createdAt: new Date() });
       // Update conversation meta locally
       updateConversationMeta(c => c._id === conversationId, () => ({
         lastMessageAt: data.createdAt || new Date().toISOString(),

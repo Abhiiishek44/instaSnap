@@ -6,6 +6,8 @@ import {useUser} from '../context/userContext';
 import { useMessage } from '../context/messageContext';
 import { useParams } from 'react-router-dom';
 import ChatWindow from '../components/ChatWindow';
+// Unread badge removed per request
+
 export default function Message() {
   const [search, setSearch] = useState('');
   const { user } = useUser();
@@ -75,6 +77,9 @@ export default function Message() {
                   const yr = Math.floor(day/365);
                   return yr + 'y';
                 })();
+                // Access unread counts from context via window temporary (will refactor if needed)
+                // (Better: consumption via useMessage, but we already invoked above)
+                // We'll retrieve unreadCounts through a prop or additional selector if available.
                 return (
                   <button
                     key={conv._id}
@@ -86,7 +91,7 @@ export default function Message() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate">{other?.userName || 'Unknown'}</p>
-                      <p className="text-xs text-gray-500 truncate">{last ? (last.content || last.text) : 'Tap to chat'}</p>
+                      <p className="text-xs text-gray-500 truncate">{last ? (last.content || last.text) : (conv.lastMessagePreview || 'Tap to chat')}</p>
                     </div>
                     <div className="pl-2 flex flex-col items-end justify-start">
                       <span className="text-[10px] text-gray-400 whitespace-nowrap">{time}</span>

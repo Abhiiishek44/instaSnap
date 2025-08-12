@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Search as SearchIcon, Home, Compass, MessageCircle, Heart, PlusSquare, User, Settings, LogOut, X ,InstagramIcon, Instagram } from 'lucide-react';
+// Unread message badge removed per request
 import { useUser } from '../context/userContext';
 import CreatePost from './CreatePost';
 import Search from './Search';
@@ -51,15 +52,15 @@ const SideBar = ({ initialCollapsed = false }) => {
         <User size={24} />
     );
 
-    const navItems = [
-        { icon: <Home size={24} />, text: 'Home', path: '/' },
-        { icon: <SearchIcon size={24} />, text: 'Search', action: activateSearch },
-        { icon: <Compass size={24} />, text: 'Explore', path: '/explore' },
-        { icon: <MessageCircle size={24} />, text: 'Messages', path: '/messages' },
-        { icon: <Heart size={24} />, text: 'Notifications', action: activateNotifications },
-        { icon: <PlusSquare size={24} />, text: 'Create', action: () => setIsCreateModalOpen(true) },
-        { icon: profileIcon, text: 'Profile', path: '/profile' },
-    ];
+        const navItems = [
+                { icon: <Home size={24} />, text: 'Home', path: '/' },
+                { icon: <SearchIcon size={24} />, text: 'Search', action: activateSearch },
+                { icon: <Compass size={24} />, text: 'Explore', path: '/explore' },
+                { icon: <MessageCircle size={24} />, text: 'Messages', path: '/messages' },
+                { icon: <Heart size={24} />, text: 'Notifications', action: activateNotifications },
+                { icon: <PlusSquare size={24} />, text: 'Create', action: () => setIsCreateModalOpen(true) },
+                { icon: profileIcon, text: 'Profile', path: '/profile' },
+        ];
 
     const isPanelActive = isSearchActive || isNotificationsActive;
     const collapsed = isCollapsed || isPanelActive;

@@ -46,12 +46,14 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+  socket.on("sendMessage", ({ senderId, receiverId, text, conversationId }) => {
     if (!senderId || !receiverId || !text) return;
     const receiverSocketId = onlineUsers[receiverId];
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("receiveMessage", {
         senderId,
+        receiverId,
+        conversationId,
         text,
         createdAt: new Date()
       });
